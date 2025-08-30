@@ -1,0 +1,593 @@
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Search, Trophy, Users, Newspaper, Calendar, SoccerBall, ChevronRight, Star, Flag, Linkedin, Twitter, Youtube, Mail, MapPin, Globe, Shield, PlayCircle } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+
+// --- Mock Data (swap with live APIs later) ---
+const topStories = [
+  {
+    title: "Title-Race Heats Up as Giants Clash",
+    summary:
+      "A tactical chess match decided on set-pieces and pressing triggers. Here’s how it unfolded, minute by minute.",
+    tag: "Analysis",
+    image:
+      "https://images.unsplash.com/photo-1542452255191-c85a98f2c5c7?q=80&w=2070&auto=format&fit=crop",
+  },
+  {
+    title: "Rising Star Watch: Left Winger Lighting Up Europe",
+    summary:
+      "At just 19, this inverted winger is breaking lines with outrageous ball-carrying and chance creation.",
+    tag: "Scouting",
+    image:
+      "https://images.unsplash.com/photo-1526232761682-d26e03ac148e?q=80&w=2069&auto=format&fit=crop",
+  },
+  {
+    title: "Data Deep-Dive: Who Presses Best?",
+    summary:
+      "PPDA, high regains, and heatmaps tell a story about elite off-ball structure.",
+    tag: "Data",
+    image:
+      "https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?q=80&w=2070&auto=format&fit=crop",
+  },
+];
+
+const fixtures = [
+  { date: "2025-09-02", comp: "Premier League", home: "City", away: "United", venue: "City Ground" },
+  { date: "2025-09-03", comp: "LaLiga", home: "Madrid", away: "Sevilla", venue: "Bernabéu" },
+  { date: "2025-09-04", comp: "Serie A", home: "Milan", away: "Roma", venue: "San Siro" },
+  { date: "2025-09-05", comp: "Bundesliga", home: "Bayern", away: "Leipzig", venue: "Allianz Arena" },
+];
+
+const leagueTable = [
+  { pos: 1, team: "City", p: 4, w: 4, d: 0, l: 0, gd: 9, pts: 12 },
+  { pos: 2, team: "Arsenal", p: 4, w: 3, d: 1, l: 0, gd: 6, pts: 10 },
+  { pos: 3, team: "Liverpool", p: 4, w: 3, d: 0, l: 1, gd: 5, pts: 9 },
+  { pos: 4, team: "Spurs", p: 4, w: 2, d: 1, l: 1, gd: 3, pts: 7 },
+];
+
+const shotMap = [
+  { zone: "6-yard", shots: 8 },
+  { zone: "Penalty", shots: 22 },
+  { zone: "Half-space L", shots: 10 },
+  { zone: "Half-space R", shots: 12 },
+  { zone: "Outside Box", shots: 15 },
+];
+
+const formChart = [
+  { round: "R1", pts: 3 },
+  { round: "R2", pts: 1 },
+  { round: "R3", pts: 3 },
+  { round: "R4", pts: 3 },
+  { round: "R5", pts: 0 },
+  { round: "R6", pts: 3 },
+];
+
+const legends = [
+  { name: "Pelé", nation: "Brazil", role: "Forward", goals: 767 },
+  { name: "Maradona", nation: "Argentina", role: "Attacking Mid", goals: 353 },
+  { name: "Cruyff", nation: "Netherlands", role: "Forward", goals: 405 },
+  { name: "Marta", nation: "Brazil", role: "Forward", goals: 378 },
+];
+
+const clubs = [
+  { name: "Manchester City", country: "England", founded: 1880 },
+  { name: "Real Madrid", country: "Spain", founded: 1902 },
+  { name: "Bayern Munich", country: "Germany", founded: 1900 },
+  { name: "AC Milan", country: "Italy", founded: 1899 },
+  { name: "Ajax", country: "Netherlands", founded: 1900 },
+];
+
+function Section({ id, title, icon: Icon, children, description }: any) {
+  return (
+    <section id={id} className="scroll-mt-24 py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-2xl bg-gray-100 dark:bg-gray-800 shadow-sm">
+            <Icon className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{title}</h2>
+            {description && (
+              <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">{description}</p>
+            )}
+          </div>
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function StoryCard({ story }: any) {
+  return (
+    <Card className="overflow-hidden rounded-2xl border-0 shadow-md">
+      <div className="aspect-[16/9] w-full overflow-hidden">
+        <img src={story.image} alt={story.title} className="w-full h-full object-cover" />
+      </div>
+      <CardHeader className="pb-2">
+        <div className="flex items-center gap-2 mb-1">
+          <Badge variant="secondary" className="rounded-full">{story.tag}</Badge>
+        </div>
+        <CardTitle className="text-lg md:text-xl leading-tight">{story.title}</CardTitle>
+        <CardDescription className="mt-1">{story.summary}</CardDescription>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <Button className="w-full" variant="outline">
+          Read more <ChevronRight className="ml-2 w-4 h-4" />
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function FootballPortal() {
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState("analysis");
+
+  const filteredClubs = useMemo(() => {
+    if (!query) return clubs;
+    return clubs.filter(
+      (c) =>
+        c.name.toLowerCase().includes(query.toLowerCase()) ||
+        c.country.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query]);
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
+      {/* Sticky Nav */}
+      <header className="sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-neutral-950/60 border-b border-neutral-200/70 dark:border-neutral-800">
+        <nav className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 grid place-items-center shadow">
+              <SoccerBall className="w-5 h-5 text-white" />
+            </div>
+            <div className="leading-tight">
+              <p className="text-sm uppercase tracking-widest font-semibold">Total Football</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">News • Data • Culture</p>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-1">
+            {[
+              ["news", "News"],
+              ["scores", "Scores"],
+              ["analysis", "Analysis"],
+              ["tactics", "Tactics"],
+              ["history", "History"],
+              ["clubs", "Clubs"],
+              ["learn", "Learn"],
+              ["contact", "Contact"],
+            ].map(([id, label]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="px-3 py-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-sm font-medium"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 w-48 md:w-72">
+            <div className="relative w-full">
+              <Search className="w-4 h-4 absolute left-2 top-1/2 -translate-y-1/2 text-neutral-500" />
+              <Input
+                placeholder="Search clubs, players, tactics…"
+                className="pl-8 rounded-xl"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(16,185,129,0.15),transparent)]" />
+        <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+                The beautiful game, beautifully organized.
+              </h1>
+              <p className="mt-4 text-base md:text-lg text-neutral-600 dark:text-neutral-400">
+                A big, modern football website packed with news, scores, analysis, tactics, history and learning resources.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button className="rounded-2xl">Explore News</Button>
+                <Button variant="outline" className="rounded-2xl" asChild>
+                  <a href="#analysis">See Analysis</a>
+                </Button>
+                <Button variant="ghost" className="rounded-2xl" asChild>
+                  <a href="#learn">Start Learning</a>
+                </Button>
+              </div>
+              <div className="mt-6 flex items-center gap-4 text-xs text-neutral-500">
+                <div className="flex items-center gap-1"><Trophy className="w-4 h-4"/> Global leagues</div>
+                <div className="flex items-center gap-1"><Users className="w-4 h-4"/> Clubs & players</div>
+                <div className="flex items-center gap-1"><Newspaper className="w-4 h-4"/> Smart coverage</div>
+              </div>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
+              <Card className="rounded-3xl border-0 shadow-xl overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="text-xl">Live Form — Example Club</CardTitle>
+                  <CardDescription>Points per round (last 6)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-48">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={formChart}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="round" />
+                        <YAxis domain={[0, 3]} allowDecimals={false} />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="pts" strokeWidth={3} dot={{ r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <Separator className="opacity-40" />
+
+      {/* News */}
+      <Section id="news" title="Top Stories" icon={Newspaper} description="Fresh coverage across the global game.">
+        <div className="grid md:grid-cols-3 gap-6">
+          {topStories.map((s, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.05 * i }} viewport={{ once: true }}>
+              <StoryCard story={s} />
+            </motion.div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Scores & Fixtures (static demo) */}
+      <Section id="scores" title="Scores & Fixtures" icon={Calendar} description="Upcoming fixtures (demo data — connect an API for live results).">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <Card className="rounded-2xl border-0 shadow-md lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Upcoming Fixtures</CardTitle>
+              <CardDescription>Times local to your browser</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {fixtures.map((f, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900">
+                    <div className="flex items-center gap-3">
+                      <Badge className="rounded-full" variant="secondary">{f.comp}</Badge>
+                      <div>
+                        <p className="font-semibold">{f.home} vs {f.away}</p>
+                        <p className="text-xs text-neutral-500">{new Date(f.date).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-neutral-500 flex items-center gap-2"><MapPin className="w-4 h-4"/> {f.venue}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Table — Demo League</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-6 gap-2 text-xs font-medium text-neutral-500 mb-2">
+                <div>Pos</div><div className="col-span-2">Team</div><div>P</div><div>GD</div><div>Pts</div>
+              </div>
+              <div className="space-y-2">
+                {leagueTable.map((row) => (
+                  <div key={row.pos} className="grid grid-cols-6 gap-2 p-2 rounded-xl bg-neutral-50 dark:bg-neutral-900 items-center">
+                    <div>{row.pos}</div>
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Shield className="w-4 h-4"/> {row.team}
+                    </div>
+                    <div>{row.p}</div>
+                    <div>{row.gd}</div>
+                    <div className="font-bold">{row.pts}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Section>
+
+      {/* Analysis */}
+      <Section id="analysis" title="Data Analysis" icon={Star} description="Readable visuals that explain why matches are won or lost.">
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
+          <TabsList className="rounded-2xl">
+            <TabsTrigger value="xg">xG by Zone</TabsTrigger>
+            <TabsTrigger value="press">Pressing (PPDA)</TabsTrigger>
+            <TabsTrigger value="trend">Form Trend</TabsTrigger>
+          </TabsList>
+          <div className="mt-6 grid md:grid-cols-2 gap-6">
+            <TabsContent value="xg" className="col-span-2 md:col-span-1 m-0">
+              <Card className="rounded-2xl border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle>Shot Volume by Zone (Demo)</CardTitle>
+                  <CardDescription>Higher bars = more attempts</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={shotMap}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="zone" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="shots" radius={[8,8,0,0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="press" className="col-span-2 md:col-span-1 m-0">
+              <Card className="rounded-2xl border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle>Pressing Intensity (PPDA)</CardTitle>
+                  <CardDescription>Lower is better (more intense)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={[
+                        { team: "City", ppda: 7.2 },
+                        { team: "Arsenal", ppda: 8.1 },
+                        { team: "Liverpool", ppda: 8.7 },
+                        { team: "Spurs", ppda: 9.4 },
+                      ]}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="team" />
+                        <YAxis domain={[6, 12]} />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="ppda" strokeWidth={3} dot={{ r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="trend" className="col-span-2 m-0">
+              <Card className="rounded-2xl border-0 shadow-md">
+                <CardHeader>
+                  <CardTitle>Form Trend Over Rounds</CardTitle>
+                  <CardDescription>3 points for a win, 1 for a draw</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={formChart}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="round" />
+                        <YAxis domain={[0, 3]} allowDecimals={false} />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="pts" strokeWidth={3} dot={{ r: 4 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
+      </Section>
+
+      {/* Tactics */}
+      <Section id="tactics" title="Tactical Board" icon={Flag} description="Visualize shapes, roles, and rotations.">
+        <Card className="rounded-2xl border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="grid md:grid-cols-3 gap-6 items-start">
+              <div className="md:col-span-2">
+                <div className="relative aspect-[16/10] rounded-2xl overflow-hidden">
+                  <svg viewBox="0 0 1000 625" className="w-full h-full bg-emerald-50 dark:bg-emerald-900/20">
+                    {/* Pitch */}
+                    <rect x="0" y="0" width="1000" height="625" fill="transparent" stroke="currentColor" className="text-emerald-300/60" />
+                    {/* Halfway */}
+                    <line x1="500" y1="0" x2="500" y2="625" stroke="currentColor" className="text-emerald-300/60" />
+                    {/* Boxes */}
+                    <rect x="50" y="165" width="150" height="295" fill="none" stroke="currentColor" className="text-emerald-300/60"/>
+                    <rect x="800" y="165" width="150" height="295" fill="none" stroke="currentColor" className="text-emerald-300/60"/>
+                    {/* D */}
+                    <ellipse cx="225" cy="312.5" rx="40" ry="70" fill="none" stroke="currentColor" className="text-emerald-300/60"/>
+                    <ellipse cx="775" cy="312.5" rx="40" ry="70" fill="none" stroke="currentColor" className="text-emerald-300/60"/>
+                    {/* Players (4-3-3) */}
+                    {[
+                      { x: 90, y: 312.5, label: "GK" },
+                      { x: 220, y: 120, label: "LB" },
+                      { x: 220, y: 505, label: "RB" },
+                      { x: 240, y: 270, label: "LCB" },
+                      { x: 240, y: 355, label: "RCB" },
+                      { x: 420, y: 220, label: "LCM" },
+                      { x: 420, y: 405, label: "RCM" },
+                      { x: 380, y: 312.5, label: "DM" },
+                      { x: 650, y: 120, label: "LW" },
+                      { x: 650, y: 505, label: "RW" },
+                      { x: 730, y: 312.5, label: "ST" },
+                    ].map((p, i) => (
+                      <g key={i}>
+                        <circle cx={p.x} cy={p.y} r="18" fill="currentColor" className="text-emerald-500" />
+                        <text x={p.x} y={p.y+4} textAnchor="middle" fontSize="12" fill="white">{p.label}</text>
+                      </g>
+                    ))}
+                    {/* Coaching arrows */}
+                    <defs>
+                      <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse">
+                        <path d="M0,0 L0,6 L6,3 z" fill="currentColor" />
+                      </marker>
+                    </defs>
+                    <path d="M650,505 C680,440 700,380 730,312.5" stroke="currentColor" className="text-emerald-500" strokeWidth="3" fill="none" markerEnd="url(#arrow)" />
+                    <path d="M650,120 C680,185 700,245 730,312.5" stroke="currentColor" className="text-emerald-500" strokeWidth="3" fill="none" markerEnd="url(#arrow)" />
+                    <path d="M380,312.5 C430,312.5 480,312.5 530,312.5" stroke="currentColor" className="text-emerald-500" strokeWidth="3" fill="none" markerEnd="url(#arrow)" />
+                  </svg>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h3 className="text-lg font-bold">4–3–3: Wide Wingers, Single Pivot</h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                  Build-up through the pivot, interiors create overloads in the half-spaces, wingers stretch and then attack the box. Full-backs provide width or invert based on the press.
+                </p>
+                <ul className="text-sm list-disc pl-5 space-y-1">
+                  <li>Progression via third-man runs</li>
+                  <li>Five-lane occupation in attack</li>
+                  <li>Counter-press within 5 seconds of loss</li>
+                </ul>
+                <Button variant="outline" className="rounded-2xl w-full">Download Board</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </Section>
+
+      {/* History & Legends */}
+      <Section id="history" title="History & Legends" icon={Trophy} description="From the first laws to modern dynasties.">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="rounded-2xl border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Hall of Greats</CardTitle>
+              <CardDescription>Pioneers who defined eras</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {legends.map((l, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 dark:bg-neutral-900">
+                  <div>
+                    <p className="font-semibold">{l.name}</p>
+                    <p className="text-xs text-neutral-500">{l.nation} • {l.role}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-neutral-500">Career Goals</p>
+                    <p className="font-bold text-lg">{l.goals}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-0 shadow-md">
+            <CardHeader>
+              <CardTitle>Growth of the Global Game</CardTitle>
+              <CardDescription>Clubs founded by decade (demo)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie dataKey="value" data={[
+                      { name: "Pre-1900", value: 12 },
+                      { name: "1900s", value: 20 },
+                      { name: "1950s", value: 16 },
+                      { name: "2000s", value: 28 },
+                    ]} cx="50%" cy="50%" outerRadius={90} label />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Section>
+
+      {/* Clubs Directory */}
+      <Section id="clubs" title="Clubs Directory" icon={Users} description="Search and filter world clubs.">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredClubs.map((c, i) => (
+            <Card key={i} className="rounded-2xl border-0 shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">{c.name}</CardTitle>
+                <CardDescription>{c.country}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                  <Globe className="w-4 h-4"/> Founded {c.founded}
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Button variant="outline" size="sm" className="rounded-xl">View Squad</Button>
+                  <Button size="sm" className="rounded-xl" variant="secondary">Follow</Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Learn */}
+      <Section id="learn" title="Learn the Game" icon={PlayCircle} description="Guides for newcomers and coaches alike.">
+        <div className="grid md:grid-cols-3 gap-6">
+          {[{
+            title: "Rules 101",
+            desc: "Offside, fouls, substitutions, match length, and VAR basics.",
+          },{
+            title: "Positions & Roles",
+            desc: "From false 9s and inverted full-backs to box midfield concepts.",
+          },{
+            title: "Training & Drills",
+            desc: "Passing patterns, rondos, finishing drills, and small-sided games.",
+          }].map((g, i) => (
+            <Card key={i} className="rounded-2xl border-0 shadow-md">
+              <CardHeader>
+                <CardTitle>{g.title}</CardTitle>
+                <CardDescription>{g.desc}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full rounded-2xl" variant="outline">Open Guide</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Footer */}
+      <footer id="contact" className="mt-12 border-t border-neutral-200 dark:border-neutral-800">
+        <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-8">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 grid place-items-center shadow">
+                <SoccerBall className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold">Total Football</h3>
+            </div>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-3">
+              A big, modern football portal. Swap demo data for your feeds, connect a live scores API, and publish.
+            </p>
+          </div>
+          <div className="text-sm">
+            <p className="font-semibold mb-2">Quick Links</p>
+            <ul className="space-y-1">
+              <li><a href="#news" className="hover:underline">News</a></li>
+              <li><a href="#scores" className="hover:underline">Scores</a></li>
+              <li><a href="#analysis" className="hover:underline">Analysis</a></li>
+              <li><a href="#tactics" className="hover:underline">Tactics</a></li>
+              <li><a href="#learn" className="hover:underline">Learn</a></li>
+            </ul>
+          </div>
+          <div className="text-sm">
+            <p className="font-semibold mb-2">Contact</p>
+            <ul className="space-y-1 text-neutral-600 dark:text-neutral-400">
+              <li className="flex items-center gap-2"><Mail className="w-4 h-4"/> hello@totalfootball.example</li>
+              <li className="flex items-center gap-2"><Twitter className="w-4 h-4"/> @TotalFootball</li>
+              <li className="flex items-center gap-2"><Youtube className="w-4 h-4"/> /TotalFootballTV</li>
+              <li className="flex items-center gap-2"><Linkedin className="w-4 h-4"/> Total Football Media</li>
+            </ul>
+          </div>
+        </div>
+        <div className="text-xs text-neutral-500 text-center pb-8">© {new Date().getFullYear()} Total Football. All rights reserved.</div>
+      </footer>
+    </div>
+  );
+}
